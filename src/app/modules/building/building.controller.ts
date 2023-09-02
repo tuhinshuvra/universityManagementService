@@ -18,16 +18,17 @@ const insertIntoDB = catchAsync(async (req: Request, res: Response) => {
 })
 
 const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
-  const result = await BuildingService.getAllFromDB();
 
   const filters = pick(req.query, buildingFilterAbleFields);
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const result = await BuildingService.getAllFromDB(filters, options);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "Building fetched successfully!",
-    data: result
+    meta: result.meta,
+    data: result.data
   })
 })
 

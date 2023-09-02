@@ -1,5 +1,6 @@
 import { Building, Prisma } from "@prisma/client";
 import { paginationHelpers } from "../../../helpers/paginationHelper";
+import { IGenericResponse } from "../../../interfaces/common";
 import { IPaginationOptions } from "../../../interfaces/pagination";
 import prisma from "../../../shared/prisma";
 import { IBuildingFilterRequest } from "./building.interface";
@@ -17,7 +18,7 @@ const insertIntoDB = async (data: Building): Promise<Building> => {
 const getAllFromDB = async (
   filters: IBuildingFilterRequest,
   options: IPaginationOptions
-) => {
+): Promise<IGenericResponse<Building[]>> => {
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
   const { searchTerm } = filters;
 
@@ -50,7 +51,18 @@ const getAllFromDB = async (
         createdAt: 'desc'
       }
   });
-  return result;
+
+  const total = await prisma.building.count({
+    where: whereConditons
+  })
+  return {
+    meta: {
+      page,
+      limit,
+      total
+    },
+    data: result
+  };
 }
 
 export const BuildingService = {
